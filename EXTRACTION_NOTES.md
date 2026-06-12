@@ -1,28 +1,16 @@
-# AGENTS.md — DnD Tracker
+# Extraction notes
 
-## Goal
-Keep this app simple, local-first, and easy to run in a browser. It is a DnD companion/tracker extracted from a bundled offline HTML file into a Vite + React project.
+Source file: `DnD Tracker (offline).html`
 
-## Commands
-- Install: `npm install`
-- Dev server: `npm run dev`
-- Production build: `npm run build`
-- Preview build: `npm run preview`
+Current state:
+- The app now uses a normal Vite + React project structure.
+- `index.html` loads `src/main.jsx`.
+- `src/main.jsx` renders React and imports styles.
+- `src/App.jsx` contains the extracted main app.
+- `src/levelup.jsx` provides a working lightweight level-up modal and backup bar.
+- `src/styles.css` contains baseline styling for the extracted UI.
 
-## Architecture
-- `src/main.jsx` is the app entrypoint.
-- `src/App.jsx` contains the main UI and most application logic.
-- `src/levelup.jsx` is a compatibility helper module. It attaches `LevelUpModal`, `computeLevelUpPlan`, and `BackupBar` to `window` because the original app expected those globals.
-- `src/styles.css` contains the extracted app CSS.
-
-## Editing rules
-- Do not move persistent data away from `localStorage` unless the task explicitly asks for it.
-- Preserve existing German UI wording unless the task asks for copy changes.
-- Before changing data structures, add a small migration path so existing saved browser data still loads.
-- Keep the app usable offline after dependencies are installed; do not add server-only features for core gameplay tracking.
-- Prefer small, focused components over one huge rewrite.
-- Do not add telemetry, accounts, ads, analytics, or remote storage without explicit approval.
-
-## Checks before finishing
-- Run `npm run build` when dependencies are available.
-- Manually smoke-test: app loads, navigation works, dice roll works, backup export/import buttons still render, and PDF import does not throw before selecting a file.
+Potential follow-up:
+- Split `src/App.jsx` into smaller screen and component files.
+- Add tests for dice parsing, damage parsing, imports, and level-up calculations.
+- Expand DnD-specific features after the build stays stable.

@@ -1,4 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { PDFDocument } from "pdf-lib";
+import { BackupBar, LevelUpModal } from "./levelup.jsx";
+
+const DEFAULT_TWEAKS = { density: "comfortable", diceAnim: true, showVitals: true, campaign: "Meine Kampagne" };
 
 // =========================================================================
 // PERSISTENCE
@@ -178,9 +182,8 @@ const buildPatchFromFields = (rawMap) => {
 const readCharFile = async (file) => {
   const ext = (file.name.split(".").pop() || "").toLowerCase();
   if (ext === "pdf") {
-    if (!window.PDFLib) throw new Error("PDF-Bibliothek nicht geladen.");
     const buf = await file.arrayBuffer();
-    const pdf = await window.PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+    const pdf = await PDFDocument.load(buf, { ignoreEncryption: true });
     const form = pdf.getForm();
     const raw = {};
     form.getFields().forEach(fl => {
@@ -404,7 +407,7 @@ const Character = ({ c, setC }) => {
 
   // Import / Export
   const [luOpen, setLuOpen] = useState(false);
-  const LU = window.LevelUpModal;
+  const LU = LevelUpModal;
   const [impOpen, setImpOpen] = useState(false);
   const [impData, setImpData] = useState(null);
   const [impErr, setImpErr] = useState("");
@@ -1797,7 +1800,7 @@ const NAV = [
 ];
 
 const App = () => {
-  const [tweaks, setTweaks] = usePersistent("tweaks", window.TWEAKS);
+  const [tweaks, setTweaks] = usePersistent("tweaks", DEFAULT_TWEAKS);
   const [tweaksOpen, setTweaksOpen] = usePersistent("tweaksOpen", false);
   const [screen, setScreen] = useState(() => localStorage.getItem("dnd.screen") || "combat");
   const [char, setChar] = usePersistent("character", CHARACTER);
@@ -1809,6 +1812,11 @@ const App = () => {
       if (!Array.isArray(m.attacks)) { m.attacks = []; changed = true; }
       if (!Array.isArray(m.slots)) { m.slots = []; changed = true; }
       if (!Array.isArray(m.spells)) { m.spells = []; changed = true; }
+      if (!Array.isArray(m.skills)) { m.skills = CHARACTER.skills; changed = true; }
+      if (!Array.isArray(m.features)) { m.features = []; changed = true; }
+      if (!m.stats) { m.stats = CHARACTER.stats; changed = true; }
+      if (!m.hitDice) { m.hitDice = CHARACTER.hitDice; changed = true; }
+      if (!m.initials) { m.initials = (m.name || CHARACTER.name).trim().charAt(0) || "?"; changed = true; }
       if (m.spellDC == null) { m.spellDC = 13; changed = true; }
       if (m.spellAtk == null) { m.spellAtk = 5; changed = true; }
       if (!m.deathSaves) { m.deathSaves = { s: 0, f: 0 }; changed = true; }
@@ -1880,7 +1888,7 @@ const App = () => {
           </div>
         )}
         <div className="sidebar-footer">
-          {window.BackupBar && <window.BackupBar/>}
+          <BackupBar/>
           <div className="char-chip">
             <div className="char-portrait" style={c.portrait ? { padding: 0, overflow: "hidden" } : {}}>{c.portrait ? <img src={c.portrait} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/> : c.initials}</div>
             <div>
