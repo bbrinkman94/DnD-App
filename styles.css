@@ -1,0 +1,10 @@
+# Build verification
+
+Verified in this environment on 2026-06-12:
+
+```bash
+npm install
+npm run build
+```
+
+Result: build completed successfully. Vite emitted a normal large-chunk warning because the app is still mostly one extracted file. That is not a build failure.
