@@ -9,7 +9,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { audio } from '@/audio/engine';
-import { Ansbeth, Corvin, Emrik, Nell, Tovin } from '@/characters/cast';
+import { Ansbeth, CharacterLight, Corvin, Emrik, Nell, Tovin } from '@/characters/cast';
 import { useGame } from '@/game/store';
 import { PALETTE } from '@/three/palette';
 import { stoneTexture, woodTexture } from '@/three/textures';
@@ -198,7 +198,7 @@ export function InnScene(): JSX.Element {
         look={inside ? 'inn-inside' : 'inn-outside'}
         moonAngle={inside ? [-3, 6, 4] : [-9, 7, 6]}
         moonColor={inside ? '#a87b46' : '#7f8fb5'}
-        moonIntensity={inside ? 0.22 : 0.75}
+        moonIntensity={inside ? 0.26 : 1.05}
       />
       <CameraRig
         target={exploration.position}
@@ -208,6 +208,7 @@ export function InnScene(): JSX.Element {
         focus={exploration.focus}
       />
       <PostFx />
+      <CharacterLight target={exploration.position} />
 
       <group ref={corvinGroup}>
         <Corvin action={action} lookAt={lookRef.current} chill={chill} lute={hasFlag('performed') ? 'hands' : 'back'} />

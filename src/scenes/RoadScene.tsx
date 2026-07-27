@@ -10,7 +10,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { audio } from '@/audio/engine';
-import { Ansbeth, Corvin, Emrik, Nell } from '@/characters/cast';
+import { Ansbeth, CharacterLight, Corvin, Emrik, Nell } from '@/characters/cast';
 import { useGame } from '@/game/store';
 import { PALETTE } from '@/three/palette';
 import { CameraRig } from './CameraRig';
@@ -145,6 +145,7 @@ export function RoadScene(): JSX.Element {
         focus={exploration.focus}
       />
       <PostFx />
+      <CharacterLight target={exploration.position} />
 
       <group ref={corvin}>
         <Corvin action={action} lookAt={lookRef.current} chill={chill} />

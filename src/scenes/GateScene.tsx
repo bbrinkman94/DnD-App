@@ -10,7 +10,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { audio } from '@/audio/engine';
-import { Corvin } from '@/characters/cast';
+import { CharacterLight, Corvin } from '@/characters/cast';
 import { useGame } from '@/game/store';
 import { PALETTE } from '@/three/palette';
 import { CameraRig } from './CameraRig';
@@ -113,6 +113,7 @@ export function GateScene(): JSX.Element {
         focus={exploration.focus}
       />
       <PostFx />
+      <CharacterLight target={exploration.position} />
 
       <group ref={corvin}>
         <Corvin action={action} lookAt={lookRef.current} chill={Math.max(chill, 0.9)} />

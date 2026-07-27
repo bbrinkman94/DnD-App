@@ -10,7 +10,7 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { audio } from '@/audio/engine';
-import { Ansbeth, Corvin, MistWolf, Nell, Shade } from '@/characters/cast';
+import { Ansbeth, CharacterLight, Corvin, MistWolf, Nell, Shade } from '@/characters/cast';
 import type { FigureAction } from '@/characters/Figure';
 import { currentActor } from '@/combat/engine';
 import { ZONES } from '@/data/encounter';
@@ -147,6 +147,7 @@ export function ShrineScene(): JSX.Element {
         focus={(combat ? combatFocus : exploration.focus) as MutableRefObject<THREE.Vector3 | null>}
       />
       <PostFx />
+      <CharacterLight target={exploration.position} />
 
       {!inCombat && (
         <>

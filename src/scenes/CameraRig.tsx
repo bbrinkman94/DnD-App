@@ -36,11 +36,11 @@ interface Rig {
 const RIGS: Record<CameraCue, Rig> = {
   default: { offset: [0.4, 2.85, 4.6], lookHeight: 1.2, fov: 46 },
   wide: { offset: [2.2, 4.2, 7.4], lookHeight: 1.2, fov: 52 },
-  'two-shot': { offset: [1.5, 2.05, 3.0], lookHeight: 1.42, fov: 40 },
-  'over-shoulder': { offset: [0.85, 1.85, 2.0], lookHeight: 1.5, fov: 38 },
-  closeup: { offset: [0.55, 1.72, 1.55], lookHeight: 1.56, fov: 34 },
-  medallion: { offset: [0.28, 1.44, 0.95], lookHeight: 1.34, fov: 28 },
-  whisper: { offset: [-0.6, 1.66, 1.3], lookHeight: 1.5, fov: 31, roll: 0.045 },
+  'two-shot': { offset: [1.6, 2.0, 3.3], lookHeight: 0.92, fov: 40 },
+  'over-shoulder': { offset: [0.9, 1.9, 2.2], lookHeight: 1.05, fov: 38 },
+  closeup: { offset: [0.6, 1.78, 1.7], lookHeight: 1.22, fov: 34 },
+  medallion: { offset: [0.3, 1.5, 1.05], lookHeight: 1.14, fov: 28 },
+  whisper: { offset: [-0.65, 1.72, 1.45], lookHeight: 1.18, fov: 31, roll: 0.045 },
   reveal: { offset: [0, 1.25, 7.4], lookHeight: 2.6, fov: 58 },
   combat: { offset: [5.4, 3.9, 6.6], lookHeight: 0.9, fov: 42 },
 };

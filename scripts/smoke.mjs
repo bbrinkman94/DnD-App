@@ -112,6 +112,33 @@ for (let round = 0; round < 14; round++) {
 await shot('07-combat-late');
 say('combat outcome:', await page.evaluate(() => window.thresholdStores.useGame.getState().combat?.outcome ?? 'resolved'));
 
+// Defeat and retry: force the outcome, check the panel, take the retry.
+await page.evaluate(() => {
+  const store = window.thresholdStores.useGame;
+  const g = store.getState();
+  if (!g.combat) g.beginCombat();
+  const combat = store.getState().combat;
+  store.setState({
+    combat: {
+      ...combat,
+      outcome: 'defeat',
+      actors: { ...combat.actors, corvin: { ...combat.actors.corvin, hp: 0, downed: true } },
+    },
+  });
+});
+await page.waitForTimeout(900);
+await shot('07b-defeat');
+say('defeat panel:', await page.locator('.combat__result .modal__title').textContent().catch(() => 'missing'));
+const retry = page.getByRole('button', { name: 'Try it again' });
+if (await retry.count()) {
+  await retry.click();
+  await page.waitForTimeout(1200);
+  say('after retry:', await page.evaluate(() => {
+    const c = window.thresholdStores.useGame.getState().combat;
+    return c ? `${c.outcome}, round ${c.round}, corvin ${c.actors.corvin.hp}hp` : 'no combat';
+  }));
+}
+
 // Menus and settings persistence.
 await page.keyboard.press('Escape');
 await page.waitForTimeout(600);

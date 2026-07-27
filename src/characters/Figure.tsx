@@ -434,6 +434,8 @@ export function Figure({
                   side={THREE.DoubleSide}
                   flatShading
                   roughness={0.98}
+                  emissive={palette.accent}
+                  emissiveIntensity={0.06}
                 />
               </mesh>
             </group>
@@ -488,13 +490,16 @@ function Lute({
 
   const transform =
     position === 'back'
-      ? { position: [0, torso * 0.42, -shoulder * 0.78] as [number, number, number], rotation: [0.1, 0, 0.85] as [number, number, number] }
+      ? {
+          position: [0.03, torso * 0.5, -shoulder * 0.92] as [number, number, number],
+          rotation: [0.18, 0.25, 1.05] as [number, number, number],
+        }
       : { position: [0.02, torso * 0.2, shoulder * 0.95] as [number, number, number], rotation: [0.25, 0.2, 0.5] as [number, number, number] };
 
   return (
-    <group {...transform}>
+    <group {...transform} scale={position === 'back' ? 0.82 : 1}>
       {/* body */}
-      <mesh scale={[1, 1, 0.55]} castShadow>
+      <mesh scale={[1, 1, 0.5]} castShadow>
         <sphereGeometry args={[0.13, 10, 8]} />
         <meshStandardMaterial color="#4a3122" flatShading roughness={0.7} />
       </mesh>

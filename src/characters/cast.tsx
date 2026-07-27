@@ -8,6 +8,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
+import type { MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { Figure, type FigureAction, type FigurePalette } from './Figure';
 
@@ -72,10 +73,6 @@ export function Corvin({
 }: CastProps & { chill?: number; lute?: 'back' | 'hands' | null; castColor?: string }): JSX.Element {
   return (
     <group>
-      {/* Corvin carries his own lighting. In a world this dark, the protagonist
-          has to stay readable wherever the fog puts him. */}
-      <pointLight position={[0.6, 2.3, 1.4]} color="#c8d2e6" intensity={2.6} distance={5.5} decay={2} />
-      <pointLight position={[-0.9, 1.5, -1.5]} color="#8d2f42" intensity={1.5} distance={4.5} decay={2} />
       <Figure
       palette={CORVIN_PALETTE}
       build="slender"
@@ -90,6 +87,30 @@ export function Corvin({
       chill={chill}
       castColor={castColor}
       />
+    </group>
+  );
+}
+
+/**
+ * Corvin's personal lighting, in *world* space so it does not rotate with him.
+ * In a world this dark the protagonist has to stay readable wherever the fog
+ * puts him: a cold key from the camera side, a wine-red rim from behind.
+ */
+export function CharacterLight({
+  target,
+  intensity = 1,
+}: {
+  target: MutableRefObject<THREE.Vector3>;
+  intensity?: number;
+}): JSX.Element {
+  const group = useRef<THREE.Group>(null);
+  useFrame(() => {
+    if (group.current) group.current.position.copy(target.current);
+  });
+  return (
+    <group ref={group}>
+      <pointLight position={[1.1, 2.4, 2.4]} color="#c8d2e6" intensity={3.4 * intensity} distance={6.5} decay={2} />
+      <pointLight position={[-1.4, 1.4, -1.9]} color="#8d2f42" intensity={1.8 * intensity} distance={5} decay={2} />
     </group>
   );
 }
