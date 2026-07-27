@@ -129,14 +129,18 @@ await page.evaluate(() => {
 await page.waitForTimeout(900);
 await shot('07b-defeat');
 say('defeat panel:', await page.locator('.combat__result .modal__title').textContent().catch(() => 'missing'));
-const retry = page.getByRole('button', { name: 'Try it again' });
-if (await retry.count()) {
-  await retry.click();
-  await page.waitForTimeout(1200);
-  say('after retry:', await page.evaluate(() => {
-    const c = window.thresholdStores.useGame.getState().combat;
-    return c ? `${c.outcome}, round ${c.round}, corvin ${c.actors.corvin.hp}hp` : 'no combat';
-  }));
+try {
+  await page.getByRole('button', { name: 'Try it again' }).click({ timeout: 6000, noWaitAfter: true });
+  await page.waitForTimeout(1500);
+  say(
+    'after retry:',
+    await page.evaluate(() => {
+      const c = window.thresholdStores.useGame.getState().combat;
+      return c ? `${c.outcome}, round ${c.round}, corvin ${c.actors.corvin.hp}hp` : 'no combat';
+    }),
+  );
+} catch (error) {
+  say('retry click failed:', String(error).split('\n')[0]);
 }
 
 // Menus and settings persistence.
