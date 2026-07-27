@@ -1,5 +1,7 @@
-node_modules/
-dist/
-.env
-.DS_Store
 *.log
+*.tsbuildinfo
+.DS_Store
+.env
+dist/
+node_modules/
+smoke-shots/
