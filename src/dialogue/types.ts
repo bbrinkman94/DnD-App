@@ -53,7 +53,8 @@ export type CameraCue =
   | 'wide'
   | 'medallion'
   | 'whisper'
-  | 'reveal';
+  | 'reveal'
+  | 'combat';
 
 export interface DialogueLine {
   speaker: CharacterId;

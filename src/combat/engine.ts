@@ -242,7 +242,7 @@ export function canTarget(attacker: Actor, target: Actor): boolean {
   return zonesAdjacent(attacker.zone, target.zone);
 }
 
-function consumeInspiration(state: CombatState, actor: Actor): Status | undefined {
+function consumeInspiration(actor: Actor): Status | undefined {
   const index = actor.statuses.findIndex((s) => s.id === 'inspired');
   if (index < 0) return undefined;
   const [status] = actor.statuses.splice(index, 1);
@@ -362,7 +362,7 @@ export function performPlayerAction(state: CombatState, action: PlayerAction): A
       next.budget.action = false;
 
       const modifier = weapon.attackBonus + ZONES[corvin.zone].offenceBonus - (hasStatus(corvin, 'shaken') ? 2 : 0);
-      const inspiration = consumeInspiration(next, corvin);
+      const inspiration = consumeInspiration(corvin);
       const { record, total } = makeRoll(`${weapon.name} attack`, modifier, rng, {
         dc: effectiveAc(target, isMelee ? 'melee' : 'ranged'),
       });
@@ -586,7 +586,7 @@ function saveDetail(record: RollRecord): string {
 export function endTurn(state: CombatState): ActionResult {
   const next = state.events.length === 0 ? clone(state) : state;
   const actor = currentActor(next);
-  tickStatuses(next, actor);
+  tickStatuses(actor);
 
   next.turnIndex += 1;
   if (next.turnIndex >= next.order.length) {
@@ -611,7 +611,7 @@ export function endTurn(state: CombatState): ActionResult {
   return { state: next, events: next.events };
 }
 
-function tickStatuses(state: CombatState, actor: Actor): void {
+function tickStatuses(actor: Actor): void {
   actor.statuses = actor.statuses
     .map((s) => (s.id === 'inspired' ? s : { ...s, rounds: s.rounds - 1 }))
     .filter((s) => s.rounds > 0);
@@ -686,7 +686,7 @@ export function runAiTurn(state: CombatState): ActionResult {
     if (!target) return endTurn(next);
   }
 
-  const inspiration = consumeInspiration(next, actor);
+  const inspiration = consumeInspiration(actor);
   const modifier = attackModifier(actor);
   const { record } = makeRoll(`${actor.attack.name}`, modifier, rng, {
     dc: effectiveAc(target, actor.attack.reach),
