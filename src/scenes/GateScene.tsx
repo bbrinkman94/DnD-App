@@ -18,6 +18,7 @@ import { Companions } from './RoadScene';
 import { Marker } from './Marker';
 import { PostFx, SceneAtmosphere } from './SceneShell';
 import { useExploration, useInteractionKey, type Interactable } from './exploration';
+import { GATE } from './layout';
 import { CastleSilhouette, GatePillars, Motes, TreeField, WetGround } from './props';
 
 export function GateScene(): JSX.Element {
@@ -36,23 +37,20 @@ export function GateScene(): JSX.Element {
     () => [
       {
         id: 'pillars',
-        position: [0, 1.4, -4],
-        radius: 3.4,
+        ...GATE.points.pillars,
         label: 'Walk to the pillars',
         once: true,
         onInteract: () => startDialogue('gate-arrive'),
       },
       {
         id: 'medallion',
-        position: [2.2, 1.2, 1.4],
-        radius: 1.8,
+        ...GATE.points.medallion,
         label: 'Die Schwelle',
         onInteract: () => inspectMedallion(true),
       },
       {
         id: 'behind',
-        position: [0, 1.0, 7.5],
-        radius: 2.6,
+        ...GATE.points.behind,
         label: 'Look back at the road',
         available: () => completed,
         onInteract: () => {
@@ -66,8 +64,9 @@ export function GateScene(): JSX.Element {
   );
 
   const exploration = useExploration({
-    start: [0, 8],
-    bounds: { minX: -7, maxX: 7, minZ: -3.5, maxZ: 10 },
+    start: GATE.start,
+    bounds: GATE.bounds,
+    obstacles: GATE.obstacles,
     interactables,
     footstep: 'footstep-mud',
     cameraYaw: 0,

@@ -41,6 +41,7 @@ node scripts/smoke.mjs   # optional Playwright walkthrough (see README)
 | `src/combat/` | combat types, engine (rules + AI), balance tests |
 | `src/characters/` | the procedural character rig and the dressed cast |
 | `src/scenes/` | the four playable scenes, camera rig, atmosphere, props, exploration |
+| `src/scenes/layout.ts` | **where the player may stand and what they may touch** — bounds, obstacles and interaction points, kept as data so `reachability.test.ts` can prove every point is actually reachable |
 | `src/components/` | all interface: title, HUD, dialogue, dice, combat, menus, medallion |
 | `src/audio/` | the Web Audio synthesis engine and Corvin's motif |
 | `src/three/` | palette, procedural textures, d20 mesh builder |
@@ -119,6 +120,13 @@ serialisation, migration and corrupt-save handling.
 
 Add a test with every rule change. If a rule cannot be tested, it is in the wrong
 file.
+
+**Spatial rule:** an interaction point the player cannot physically stand near is
+invisible — the prompt never appears and the chapter cannot be finished. Movement
+bounds, collision circles and interaction radii therefore live in
+`src/scenes/layout.ts` as data, and `reachability.test.ts` replays the movement
+resolution over a grid to prove every point is reachable with at least 0.3 m of
+slack. Never inline those numbers back into a scene component.
 
 ## Copyright
 

@@ -145,6 +145,7 @@ threshold.chapter('shrine')    jump to a chapter
 threshold.seed('anything')     pin every future roll to a seed
 threshold.chill(1, 3)          force the medallion state
 threshold.combat()             start the encounter immediately
+threshold.where()              where Corvin is standing right now
 threshold.state()              dump the current run
 ```
 
