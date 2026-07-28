@@ -17,10 +17,11 @@ import { CameraRig } from './CameraRig';
 import { Marker } from './Marker';
 import { PostFx, SceneAtmosphere } from './SceneShell';
 import { useExploration, useInteractionKey, type Interactable } from './exploration';
+import { ROAD, ROAD_END_Z, ROAD_START_Z } from './layout';
 import { Motes, TreeField, WetGround } from './props';
 
-const START_Z = 10;
-const END_Z = -30;
+const START_Z = ROAD_START_Z;
+const END_Z = ROAD_END_Z;
 
 /** z position -> 0..1 along the road. */
 function progressAt(z: number): number {
@@ -44,15 +45,13 @@ export function RoadScene(): JSX.Element {
     () => [
       {
         id: 'medallion',
-        position: [1.6, 1.2, 2.0],
-        radius: 2.0,
+        ...ROAD.points.medallion,
         label: 'Die Schwelle is cold',
         onInteract: () => inspectMedallion(true),
       },
       {
         id: 'tracks',
-        position: [-2.2, 0.4, -4.0],
-        radius: 2.0,
+        ...ROAD.points.tracks,
         label: 'Tracks in the mud',
         once: true,
         onInteract: () => {
@@ -62,8 +61,7 @@ export function RoadScene(): JSX.Element {
       },
       {
         id: 'stone',
-        position: [2.6, 0.5, -13.0],
-        radius: 2.2,
+        ...ROAD.points.stone,
         label: 'A boundary stone, face down',
         once: true,
         onInteract: () => {
@@ -76,8 +74,9 @@ export function RoadScene(): JSX.Element {
   );
 
   const exploration = useExploration({
-    start: [0, START_Z],
-    bounds: { minX: -6, maxX: 6, minZ: END_Z - 1, maxZ: START_Z + 2 },
+    start: ROAD.start,
+    bounds: ROAD.bounds,
+    obstacles: ROAD.obstacles,
     interactables,
     footstep: 'footstep-mud',
     cameraYaw: 0,

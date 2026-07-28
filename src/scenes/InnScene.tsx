@@ -17,6 +17,7 @@ import { CameraRig } from './CameraRig';
 import { Marker } from './Marker';
 import { PostFx, SceneAtmosphere } from './SceneShell';
 import { useExploration, useInteractionKey, type Interactable } from './exploration';
+import { INN_INSIDE, INN_OUTSIDE } from './layout';
 import { Candle, Hearth, Motes, Rain, Stool, Table, TimberWall, TreeField, WetGround } from './props';
 
 const YAW = 0;
@@ -41,8 +42,7 @@ export function InnScene(): JSX.Element {
       return [
         {
           id: 'door',
-          position: [0, 1, -3.2],
-          radius: 2.1,
+          ...INN_OUTSIDE.points.door,
           label: 'Open the door',
           onInteract: () => {
             audio.play('door');
@@ -51,8 +51,7 @@ export function InnScene(): JSX.Element {
         },
         {
           id: 'sign',
-          position: [3.2, 1.6, -2.4],
-          radius: 1.8,
+          ...INN_OUTSIDE.points.sign,
           label: 'Read the sign',
           onInteract: () =>
             pushToast('The sign has no name on it. It has had one. Someone took it off with a chisel.', 'clue'),
@@ -62,44 +61,38 @@ export function InnScene(): JSX.Element {
     return [
       {
         id: 'emrik',
-        position: [-2.6, 0.9, -1.4],
-        radius: 1.7,
+        ...INN_INSIDE.points.emrik,
         label: hasFlag('met-emrik') ? 'Speak with Emrik again' : 'Emrik Waldenfels is waiting',
         onInteract: () => startDialogue('inn-emrik'),
       },
       {
         id: 'nell',
-        position: [2.8, 0.9, -0.4],
-        radius: 1.6,
+        ...INN_INSIDE.points.nell,
         label: 'The halfling with two kinds of mud on her boots',
         onInteract: () => startDialogue('inn-nell'),
       },
       {
         id: 'ansbeth',
-        position: [2.2, 0.9, 2.6],
-        radius: 1.6,
+        ...INN_INSIDE.points.ansbeth,
         label: 'The tall woman who has not taken off her coat',
         onInteract: () => startDialogue('inn-ansbeth'),
       },
       {
         id: 'tovin',
-        position: [-3.4, 1.1, 2.4],
-        radius: 1.7,
+        ...INN_INSIDE.points.tovin,
         label: 'The innkeeper',
         onInteract: () => startDialogue('inn-tovin'),
       },
       {
         id: 'lockbox',
-        position: [-4.4, 0.8, 3.2],
-        radius: 1.5,
+        ...INN_INSIDE.points.lockbox,
         label: "A courier's strongbox, behind the bar",
         available: () => hasFlag('tovin-box'),
         onInteract: () => startDialogue('inn-lockbox'),
       },
       {
         id: 'stool',
-        position: [0.4, 0.7, 2.9],
-        radius: 1.5,
+        ...INN_INSIDE.points.stool,
         label: 'Take out the lute',
         available: () => !hasFlag('performed'),
         once: true,
@@ -107,15 +100,13 @@ export function InnScene(): JSX.Element {
       },
       {
         id: 'window',
-        position: [4.6, 1.4, -2.2],
-        radius: 1.7,
+        ...INN_INSIDE.points.window,
         label: 'The north window',
         onInteract: () => startDialogue('inn-window'),
       },
       {
         id: 'hearth',
-        position: [-0.2, 0.7, -3.5],
-        radius: 1.8,
+        ...INN_INSIDE.points.hearth,
         label: 'The fire',
         onInteract: () => {
           setFlag('watched-fire');
@@ -125,8 +116,7 @@ export function InnScene(): JSX.Element {
       },
       {
         id: 'seat',
-        position: [-1.0, 0.6, 1.4],
-        radius: 1.4,
+        ...INN_INSIDE.points.seat,
         label: 'A chair that faces the door',
         once: true,
         onInteract: () => {
@@ -136,16 +126,14 @@ export function InnScene(): JSX.Element {
       },
       {
         id: 'medallion',
-        position: [-1.0, 1.2, 0.2],
-        radius: 1.2,
+        ...INN_INSIDE.points.medallion,
         label: 'Die Schwelle',
         available: () => chill > 0.2,
         onInteract: () => inspectMedallion(true),
       },
       {
         id: 'leave',
-        position: [0, 1, 4.6],
-        radius: 1.8,
+        ...INN_INSIDE.points.leave,
         label: 'Leave with the others, before first light',
         available: () => hasFlag('met-emrik'),
         onInteract: () => startDialogue('inn-depart'),
@@ -154,19 +142,9 @@ export function InnScene(): JSX.Element {
   }, [inside, hasFlag, startDialogue, setFlag, pushToast, inspectMedallion, chill]);
 
   const exploration = useExploration({
-    start: inside ? [0, 3.6] : [0, 4.5],
-    bounds: inside
-      ? { minX: -4.6, maxX: 5.0, minZ: -3.6, maxZ: 4.8 }
-      : { minX: -7, maxX: 7, minZ: -2.6, maxZ: 9 },
-    obstacles: inside
-      ? [
-          { x: -2.6, z: -2.1, radius: 1.0 },
-          { x: 2.8, z: -1.1, radius: 0.85 },
-          { x: 2.2, z: 1.9, radius: 0.85 },
-          { x: -3.9, z: 3.0, radius: 1.2 },
-          { x: -0.2, z: -3.9, radius: 1.1 },
-        ]
-      : [{ x: 0, z: -4.4, radius: 3.4 }],
+    start: (inside ? INN_INSIDE : INN_OUTSIDE).start,
+    bounds: (inside ? INN_INSIDE : INN_OUTSIDE).bounds,
+    obstacles: (inside ? INN_INSIDE : INN_OUTSIDE).obstacles,
     interactables,
     footstep: inside ? 'footstep-wood' : 'footstep-mud',
     cameraYaw: YAW,

@@ -12,6 +12,13 @@ import * as THREE from 'three';
 import { audio, type SfxId } from '@/audio/engine';
 import { useGame } from '@/game/store';
 
+/**
+ * Where the player last stood, for the console (`threshold.where()`).
+ * Exploration keeps its position in a ref for performance; this mirror exists
+ * so a human — or a test — can ask where Corvin actually is.
+ */
+export const playerProbe = { x: 0, z: 0, nearest: '' };
+
 export interface Obstacle {
   x: number;
   z: number;
@@ -120,7 +127,11 @@ export function useExploration(options: ExplorationOptions): ExplorationState {
   }, []);
 
   useFrame((_, delta) => {
-    const dt = Math.min(0.05, delta);
+    // Clamped so one very long frame (a tab restore, a shader compile) cannot
+    // teleport Corvin through a wall — but generously enough that anything
+    // above ten frames a second still moves at true walking pace. At 0.05 the
+    // whole game ran in slow motion on any machine under 20fps.
+    const dt = Math.min(0.1, delta);
     const frozen = mode !== 'explore' || menu !== null;
 
     let inputX = 0;
@@ -206,6 +217,10 @@ export function useExploration(options: ExplorationOptions): ExplorationState {
     if (frozen && nearest.current) {
       // Keep the prompt, but do not let it fire.
     }
+
+    playerProbe.x = position.current.x;
+    playerProbe.z = position.current.z;
+    playerProbe.nearest = best?.id ?? '';
 
     // Corvin looks toward whatever is interesting nearby.
     lookTarget.current = best ? new THREE.Vector3(...best.position) : null;

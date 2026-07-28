@@ -21,6 +21,7 @@ import { Companions } from './RoadScene';
 import { Marker } from './Marker';
 import { PostFx, SceneAtmosphere } from './SceneShell';
 import { useExploration, useInteractionKey, type Interactable } from './exploration';
+import { SHRINE } from './layout';
 import {
   BoundaryWall,
   DeadCourier,
@@ -47,47 +48,41 @@ export function ShrineScene(): JSX.Element {
     () => [
       {
         id: 'arrive',
-        position: [0, 1.2, 5.5],
-        radius: 3.2,
+        ...SHRINE.points.arrive,
         label: 'Look at what the fog has put in front of you',
         once: true,
         onInteract: () => startDialogue('shrine-arrive'),
       },
       {
         id: 'body',
-        position: [-4.6, 0.8, -1.2],
-        radius: 2.0,
+        ...SHRINE.points.body,
         label: 'The courier against the wall',
         available: () => hasFlag('at-shrine'),
         onInteract: () => startDialogue('shrine-body'),
       },
       {
         id: 'carving',
-        position: [1.6, 0.8, -2.2],
-        radius: 1.8,
+        ...SHRINE.points.carving,
         label: 'Marks cut into the shrine',
         available: () => hasFlag('at-shrine'),
         onInteract: () => startDialogue('shrine-carving'),
       },
       {
         id: 'box',
-        position: [0, 1.2, -3.0],
-        radius: 1.8,
+        ...SHRINE.points.box,
         label: 'A hollow under the altar stone',
         available: () => hasFlag('at-shrine'),
         onInteract: () => startDialogue('shrine-box'),
       },
       {
         id: 'medallion',
-        position: [-3.0, 1.2, 0.8],
-        radius: 1.6,
+        ...SHRINE.points.medallion,
         label: 'Die Schwelle is painful now',
         onInteract: () => inspectMedallion(true),
       },
       {
         id: 'treeline',
-        position: [5.6, 1.2, -4.6],
-        radius: 2.6,
+        ...SHRINE.points.treeline,
         label: 'Something at the treeline',
         available: () => hasFlag('at-shrine'),
         onInteract: () => startDialogue('shrine-presence'),
@@ -97,12 +92,9 @@ export function ShrineScene(): JSX.Element {
   );
 
   const exploration = useExploration({
-    start: [0, 7],
-    bounds: { minX: -8, maxX: 8, minZ: -6, maxZ: 9 },
-    obstacles: [
-      { x: 0, z: -2.6, radius: 2.0 },
-      { x: -3.4, z: 0.4, radius: 1.3 },
-    ],
+    start: SHRINE.start,
+    bounds: SHRINE.bounds,
+    obstacles: SHRINE.obstacles,
     interactables,
     footstep: 'footstep-stone',
     cameraYaw: 0,

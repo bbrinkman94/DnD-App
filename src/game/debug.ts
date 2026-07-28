@@ -7,6 +7,7 @@
  * accident during normal play.
  */
 
+import { playerProbe } from '@/scenes/exploration';
 import { clearSave, CHAPTER_ORDER, type ChapterId } from './save';
 import { seedAmbientRng } from './rng';
 import { useGame } from './store';
@@ -20,6 +21,7 @@ export interface ThresholdDebugApi {
   give(clue: string): void;
   chill(value: number, stage?: number): void;
   combat(): void;
+  where(): unknown;
   state(): unknown;
   settings(): unknown;
 }
@@ -37,6 +39,7 @@ export function installDebugApi(): void {
           '  threshold.chill(0..1, stage)     force the medallion state (stage 0-3)',
           '  threshold.give("clue-id")        add a clue to the journal',
           '  threshold.combat()               start the encounter immediately',
+          '  threshold.where()                where Corvin is standing right now',
           '  threshold.state()                dump the current run',
           '  threshold.settings()             dump the current settings',
         ].join('\n'),
@@ -53,6 +56,7 @@ export function installDebugApi(): void {
     give: (clue) => useGame.getState().addClue(clue),
     chill: (value, stage) => useGame.getState().setMedallion(value, stage),
     combat: () => useGame.getState().beginCombat(),
+    where: () => ({ ...playerProbe }),
     state: () => useGame.getState().run,
     settings: () => useSettings.getState(),
   };
