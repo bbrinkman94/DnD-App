@@ -520,7 +520,13 @@ export class AudioEngine {
     let step = 0;
 
     const tick = (): void => {
-      if (!this.ctx || this.suspended) return;
+      if (!this.ctx) return;
+      if (this.suspended) {
+        // Hidden tab: hold the phrase and check back, instead of letting the
+        // note loop die and the music never return.
+        this.music = { cue, timer: window.setTimeout(tick, 600), layer };
+        return;
+      }
       const notes: MotifNote[] = variant.notes;
       const note = notes[step % notes.length];
       const detune = variant.detune ? (Math.random() - 0.5) * variant.detune : 0;

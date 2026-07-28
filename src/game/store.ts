@@ -170,6 +170,8 @@ const CLUE_LABELS: Record<string, string> = {
 };
 
 let toastCounter = 0;
+/** Play time accumulates here and is flushed into the run once a second. */
+let playTimeAccumulator = 0;
 
 export const useGame = create<GameStore>((set, get) => ({
   run: createRunState(),
@@ -261,7 +263,7 @@ export const useGame = create<GameStore>((set, get) => ({
 
   eraseSave: () => {
     clearSave();
-    set({ hasSaveFile: false, everCompleted: false, run: createRunState(), phase: 'title' });
+    set({ hasSaveFile: false, everCompleted: false, run: createRunState(), phase: 'title', menu: null });
   },
 
   saveNow: () => {
@@ -274,12 +276,17 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   tick: (delta) => {
-    const { run, shake } = get();
     if (get().phase !== 'playing') return;
-    set({
-      run: { ...run, playSeconds: run.playSeconds + delta },
-      shake: shake > 0 ? Math.max(0, shake - delta * 2.5) : 0,
-    });
+    playTimeAccumulator += delta;
+    const { shake } = get();
+    const patch: Partial<GameStore> = {};
+    if (shake > 0) patch.shake = Math.max(0, shake - delta * 2.5);
+    if (playTimeAccumulator >= 1) {
+      const { run } = get();
+      patch.run = { ...run, playSeconds: run.playSeconds + playTimeAccumulator };
+      playTimeAccumulator = 0;
+    }
+    if (Object.keys(patch).length > 0) set(patch);
   },
 
   /* ---------------------------------------------------------------- world */
@@ -386,7 +393,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const newClues = run.clues.filter((c) => !before.clues.includes(c));
     set({ run });
     newClues.forEach((id) => get().pushToast(CLUE_LABELS[id] ?? 'Something noted', 'clue'));
-    handleSignals(signals, get);
+    handleSignals(signals, get, before.chapter);
   },
 
   /* ------------------------------------------------------------- dialogue */
@@ -483,7 +490,10 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   endDialogue: () => {
-    set({ dialogue: null, mode: 'explore', cameraCue: 'default' });
+    // A transition inside the closing dialogue may have put the chapter card
+    // (or the finale) on screen; do not drop back to exploration under it.
+    const cinematic = get().chapterSummary !== null || get().finale;
+    set({ dialogue: null, mode: cinematic ? 'cinematic' : 'explore', cameraCue: 'default' });
     get().saveNow();
   },
 
@@ -528,15 +538,16 @@ export const useGame = create<GameStore>((set, get) => ({
 
   beginCombat: () => {
     const { run } = get();
-    const allies: CompanionId[] = (['nell', 'ansbeth'] as CompanionId[]).filter(
-      (id) => run.companions[id].recruited || run.companions[id].met,
-    );
+    // Both companions fight regardless of whether Corvin bothered to talk to
+    // them in the inn: they signed Emrik's contract independently, and they
+    // have been walking beside him for two chapters.
+    const allies: CompanionId[] = ['nell', 'ansbeth'];
     const state = createCombat({
       seed: rng().int(1, 1_000_000),
       corvinHp: run.hp,
       slotsUsed: run.slotsUsed,
       inspirationUsed: run.inspirationUsed,
-      allies: allies.length > 0 ? allies : ['nell', 'ansbeth'],
+      allies,
     });
     set({ combat: state, mode: 'combat', dialogue: null, cameraCue: 'combat', combatBusy: false });
     audio.setMusic('combat');
@@ -561,6 +572,11 @@ export const useGame = create<GameStore>((set, get) => ({
   advanceCombat: () => {
     const { combat } = get();
     if (!combat) return;
+    if (get().menu !== null) {
+      // Paused: hold the AI turn and check back in.
+      window.setTimeout(() => get().advanceCombat(), 600);
+      return;
+    }
     if (combat.outcome !== 'ongoing') {
       get().finishCombat();
       return;
@@ -657,7 +673,7 @@ function gotoNode(set: Setter, get: Getter, tree: DialogueTree, nodeId: string):
   if (node.end && node.lines.length === 0) get().endDialogue();
 }
 
-function handleSignals(signals: Signal[], get: Getter): void {
+function handleSignals(signals: Signal[], get: Getter, beforeChapter?: ChapterId): void {
   for (const signal of signals) {
     switch (signal.kind) {
       case 'sfx':
@@ -673,13 +689,18 @@ function handleSignals(signals: Signal[], get: Getter): void {
         get().beginCombat();
         break;
       case 'endChapter': {
+        // The chapter being closed is the one we were in BEFORE this effect
+        // list ran — a `chapter` effect in the same list has usually already
+        // advanced run.chapter, and summarising the new chapter would both
+        // mislabel the card and (via dismiss) skip a chapter entirely.
         const run = get().run;
-        const index = CHAPTER_ORDER.indexOf(run.chapter);
-        const next = CHAPTER_ORDER[index + 1] ?? null;
+        const closing = beforeChapter ?? run.chapter;
+        const index = CHAPTER_ORDER.indexOf(closing);
+        const next = run.chapter !== closing ? run.chapter : (CHAPTER_ORDER[index + 1] ?? null);
         get().showChapterSummary({
-          chapter: run.chapter,
+          chapter: closing,
           nextChapter: next,
-          lines: run.choices.filter((c) => c.chapter === run.chapter).map((c) => c.label),
+          lines: run.choices.filter((c) => c.chapter === closing).map((c) => c.label),
         });
         break;
       }

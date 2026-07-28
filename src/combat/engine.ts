@@ -12,7 +12,7 @@ import { abilityModifier } from '@/data/abilities';
 import { CHARACTERS, type CompanionId } from '@/data/characters';
 import { COMMAND_WORDS, MOCKERY_LINES, SPELLS, type CommandWordId, type SpellId } from '@/data/spells';
 import { ALLY_TEMPLATES, CORVIN_START_ZONE, ENEMIES, ZONES } from '@/data/encounter';
-import { resolveAttack, rollD20, rollDamage, rollDie } from '@/game/dice';
+import { resolveAttack, rollD20, rollDamage, rollDice, rollDie, sum } from '@/game/dice';
 import { createRng, type Rng } from '@/game/rng';
 import { totalSlots } from '@/game/save';
 import type {
@@ -370,7 +370,12 @@ export function performPlayerAction(state: CombatState, action: PlayerAction): A
         const value = rollDie(inspiration.die, rng);
         record.bonusDie = { label: 'Bardic Inspiration', sides: inspiration.die, value };
         record.total = total + value;
-        record.success = record.critical === 'failure' ? false : record.total >= (record.dc ?? 0);
+        record.success =
+          record.critical === 'success'
+            ? true
+            : record.critical === 'failure'
+              ? false
+              : record.total >= (record.dc ?? 0);
       }
       emit(next, { kind: 'roll', actorId: 'corvin', roll: record });
 
@@ -475,7 +480,7 @@ function castSpell(
   if (spell.kind === 'heal' && target) {
     const heal = spell.heal!;
     const amount =
-      rollDie(heal.sides, rng) * heal.dice + abilityModifier(CORVIN.abilities[heal.bonusFromAbility]);
+      sum(rollDice(heal.dice, heal.sides, rng)) + abilityModifier(CORVIN.abilities[heal.bonusFromAbility]);
     healActor(state, target, amount);
     emit(state, { kind: 'spell', actorId: 'corvin', spell: spellId, targetId: target.id, success: true });
     pushLog(state, 'corvin', `"Not tonight." ${target.name} recovers ${amount}.`, 'spell');
@@ -695,7 +700,12 @@ export function runAiTurn(state: CombatState): ActionResult {
     const value = rollDie(inspiration.die, rng);
     record.bonusDie = { label: 'Bardic Inspiration', sides: inspiration.die, value };
     record.total += value;
-    record.success = record.critical === 'failure' ? false : record.total >= (record.dc ?? 0);
+    record.success =
+      record.critical === 'success'
+        ? true
+        : record.critical === 'failure'
+          ? false
+          : record.total >= (record.dc ?? 0);
   }
   emit(next, { kind: 'roll', actorId: actor.id, roll: record });
 

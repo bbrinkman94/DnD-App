@@ -666,6 +666,13 @@ export const encounterAfter: DialogueTree = {
           auto: true,
         },
       ],
+      next: 'go',
+    },
+    // Terminal empty node: the fog-parting lines play first, then the
+    // chapter turns over.
+    go: {
+      id: 'go',
+      lines: [],
       onEnter: [
         { kind: 'chapter', to: 'gate' },
         { kind: 'endChapter' },

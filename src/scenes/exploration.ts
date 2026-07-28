@@ -7,7 +7,7 @@
  */
 
 import { useFrame, useThree } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { audio, type SfxId } from '@/audio/engine';
 import { useGame } from '@/game/store';
@@ -79,6 +79,9 @@ export function useExploration(options: ExplorationOptions): ExplorationState {
   const used = useRef<Set<string>>(new Set());
   const keys = useRef<Set<string>>(new Set());
   const stepTimer = useRef(0);
+  // Scenes derive Corvin's animation from `moving` at render time, so a start
+  // or stop must trigger one re-render (interaction changes already do).
+  const [, bumpRender] = useReducer((x: number) => x + 1, 0);
   const focus = useRef<THREE.Vector3 | null>(null);
   const conversation = useRef<THREE.Vector3 | null>(null);
 
@@ -167,7 +170,11 @@ export function useExploration(options: ExplorationOptions): ExplorationState {
     }
 
     const speedNow = Math.hypot(velocity.current.x, velocity.current.z);
-    moving.current = speedNow > 0.35;
+    const nowMoving = speedNow > 0.35;
+    if (nowMoving !== moving.current) {
+      moving.current = nowMoving;
+      bumpRender();
+    }
 
     if (moving.current && options.footstep) {
       stepTimer.current -= dt * (speedNow / speed);
