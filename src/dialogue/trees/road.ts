@@ -381,6 +381,15 @@ export const roadHowl: DialogueTree = {
       onEnter: [
         { kind: 'medallionChill', to: 0.6 },
         { kind: 'choice', label: 'Heard the second howl answer the first' },
+      ],
+      next: 'go',
+    },
+    // The transition lives on a terminal empty node so the howl actually
+    // plays before the chapter card covers the screen.
+    go: {
+      id: 'go',
+      lines: [],
+      onEnter: [
         { kind: 'chapter', to: 'shrine' },
         { kind: 'endChapter' },
       ],

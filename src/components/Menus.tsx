@@ -41,7 +41,7 @@ export function Menus(): JSX.Element | null {
       if (event.code !== 'Escape') return;
       event.preventDefault();
       const state = useGame.getState();
-      if (state.dice) return;
+      if (state.dice || state.chapterSummary || state.finale) return;
       if (state.medallionInspect) {
         state.inspectMedallion(false);
         return;

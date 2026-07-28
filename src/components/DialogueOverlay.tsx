@@ -40,7 +40,15 @@ export function DialogueOverlay(): JSX.Element | null {
     if (autoTimer.current) window.clearTimeout(autoTimer.current);
     if (!line?.auto || !dialogue || dialogue.waitingOnDice || (lastLine && choices.length > 0)) return;
     const duration = Math.min(9000, 1800 + line.text.length * (reducedMotion ? 22 : 34));
-    autoTimer.current = window.setTimeout(() => advance(), duration);
+    const fire = (): void => {
+      // Paused: hold the line and check back rather than advancing under the menu.
+      if (useGame.getState().menu !== null) {
+        autoTimer.current = window.setTimeout(fire, 700);
+        return;
+      }
+      advance();
+    };
+    autoTimer.current = window.setTimeout(fire, duration);
     return () => {
       if (autoTimer.current) window.clearTimeout(autoTimer.current);
     };
